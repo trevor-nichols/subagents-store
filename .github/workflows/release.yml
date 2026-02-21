@@ -26,6 +26,9 @@ jobs:
             --repo "${GITHUB_REPOSITORY}" \
             --tag "${GITHUB_REF_NAME}"
 
+      - name: Verify tracked catalogs are in sync with release artifacts
+        run: git diff --exit-code -- catalog/stable.json catalog/beta.json
+
       - name: Publish release assets
         uses: softprops/action-gh-release@v2
         with:

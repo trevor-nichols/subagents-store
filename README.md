@@ -41,6 +41,7 @@ npm run manifest:add -- agents/.curated/<slug>
 
 ```bash
 npm run manifest:check
+npm run verify:repro
 ```
 
 ## Manifest format
@@ -97,6 +98,12 @@ Generate ZIP assets + channel catalogs:
 node scripts/build-catalog.mjs --repo <owner/repo> --tag <tag>
 ```
 
+For CI/offline verification without mutating checked-in catalogs:
+
+```bash
+node scripts/build-catalog.mjs --repo <owner/repo> --tag <tag> --no-write-tracked
+```
+
 Example:
 
 ```bash
@@ -110,7 +117,12 @@ Outputs:
 - `dist/catalog/checksums.txt`
 - Also updates tracked `catalog/stable.json` and `catalog/beta.json`.
 
-The release workflow (`.github/workflows/release.yml`) runs on tags (`v*`) and uploads those assets.
+Packaging is deterministic:
+- Files are ordered lexicographically.
+- File metadata is normalized before zipping.
+- ZIPs are produced with `zip -X -0` to avoid platform-specific metadata drift.
+
+The release workflow (`.github/workflows/release.yml`) runs on tags (`v*`), rebuilds assets, and fails if the tagged commit's tracked catalogs do not exactly match the release build output.
 
 ## AgentWorkplace configuration
 

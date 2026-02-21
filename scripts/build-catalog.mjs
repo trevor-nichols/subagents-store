@@ -2,7 +2,21 @@
 
 import { spawnSync } from "node:child_process";
 import { createHash } from "node:crypto";
-import { existsSync, mkdirSync, readFileSync, readdirSync, rmSync, statSync, writeFileSync } from "node:fs";
+import {
+  chmodSync,
+  copyFileSync,
+  existsSync,
+  lstatSync,
+  mkdirSync,
+  mkdtempSync,
+  readFileSync,
+  readdirSync,
+  rmSync,
+  statSync,
+  utimesSync,
+  writeFileSync,
+} from "node:fs";
+import { tmpdir } from "node:os";
 import { basename, dirname, isAbsolute, relative, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -13,6 +27,7 @@ const repoRoot = resolve(scriptDir, "..");
 const defaultManifestPath = resolve(repoRoot, "catalog/agents.manifest.json");
 const defaultOutputPath = resolve(repoRoot, "dist");
 const trackedCatalogDir = resolve(repoRoot, "catalog");
+const DETERMINISTIC_ARCHIVE_DATE = new Date("2020-01-01T00:00:00.000Z");
 
 function fail(message) {
   console.error(`Error: ${message}`);
@@ -28,6 +43,7 @@ function parseArgs(argv) {
     manifestCheck: false,
     manifestAdd: "",
     validateOnly: false,
+    writeTracked: true,
   };
 
   for (let index = 0; index < argv.length; index += 1) {
@@ -42,6 +58,10 @@ function parseArgs(argv) {
     }
     if (token === "--manifest-check") {
       args.manifestCheck = true;
+      continue;
+    }
+    if (token === "--no-write-tracked") {
+      args.writeTracked = false;
       continue;
     }
     if (!token.startsWith("--")) {
@@ -92,6 +112,7 @@ Options
   --output <path>        Output directory for packages/catalog artifacts (default: dist).
   --repo <owner/name>    GitHub repository slug for package URLs (required unless --validate-only).
   --tag <tag>            Release tag used in package URLs (required unless --validate-only).
+  --no-write-tracked     Do not overwrite tracked catalog/stable.json or catalog/beta.json.
   --manifest-check       Fail if any agents/<channel>/<slug>/config.toml is missing from manifest.
   --manifest-add <path>  Add a manifest entry scaffold for an agent directory.
   --help                 Show this help.
@@ -453,15 +474,73 @@ function ensureZipAvailable() {
   }
 }
 
+function collectFilesRecursively(rootPath, relativeDir = "") {
+  const currentPath = relativeDir ? resolve(rootPath, relativeDir) : rootPath;
+  const entries = readdirSync(currentPath, { withFileTypes: true }).sort((left, right) =>
+    left.name.localeCompare(right.name),
+  );
+  const files = [];
+
+  for (const entry of entries) {
+    const relativePath = relativeDir ? `${relativeDir}/${entry.name}` : entry.name;
+    const absolutePath = resolve(rootPath, relativePath);
+    const stats = lstatSync(absolutePath);
+
+    if (stats.isSymbolicLink()) {
+      fail(`Symbolic links are not allowed in packaged agents: ${relativePath}`);
+    }
+    if (stats.isDirectory()) {
+      files.push(...collectFilesRecursively(rootPath, relativePath));
+      continue;
+    }
+    if (!stats.isFile()) {
+      fail(`Unsupported file type in packaged agents: ${relativePath}`);
+    }
+    files.push(relativePath);
+  }
+
+  return files;
+}
+
+function copyAgentTreeDeterministically(sourceRoot, stagedRoot, relativePath) {
+  const sourcePath = resolve(sourceRoot, relativePath);
+  const stagedPath = resolve(stagedRoot, relativePath);
+  mkdirSync(dirname(stagedPath), { recursive: true });
+  copyFileSync(sourcePath, stagedPath);
+
+  const sourceMode = statSync(sourcePath).mode;
+  const permissions = sourceMode & 0o111 ? 0o755 : 0o644;
+  chmodSync(stagedPath, permissions);
+  utimesSync(stagedPath, DETERMINISTIC_ARCHIVE_DATE, DETERMINISTIC_ARCHIVE_DATE);
+}
+
 function packageAgent(agentPath, outputZipPath) {
   mkdirSync(dirname(outputZipPath), { recursive: true });
   rmSync(outputZipPath, { force: true });
-  const result = spawnSync("zip", ["-qr", outputZipPath, "."], {
-    cwd: agentPath,
-    stdio: "inherit",
-  });
-  if (result.status !== 0) {
-    fail(`zip failed for ${agentPath}`);
+
+  const files = collectFilesRecursively(agentPath);
+  if (files.length === 0) {
+    fail(`Agent package at ${agentPath} has no files.`);
+  }
+
+  const stageRoot = mkdtempSync(resolve(tmpdir(), "agents-store-stage-"));
+  const stageAgentPath = resolve(stageRoot, "agent");
+  mkdirSync(stageAgentPath, { recursive: true });
+
+  try {
+    for (const relativeFilePath of files) {
+      copyAgentTreeDeterministically(agentPath, stageAgentPath, relativeFilePath);
+    }
+
+    const result = spawnSync("zip", ["-X", "-0", "-q", outputZipPath, ...files], {
+      cwd: stageAgentPath,
+      stdio: "inherit",
+    });
+    if (result.status !== 0) {
+      fail(`zip failed for ${agentPath}`);
+    }
+  } finally {
+    rmSync(stageRoot, { recursive: true, force: true });
   }
 }
 
@@ -496,7 +575,8 @@ function buildCatalogEntry(entry, repo, tag, sha256) {
   return payload;
 }
 
-function buildCatalogFiles(entries, outputPath, repo, tag) {
+function buildCatalogFiles(entries, outputPath, repo, tag, options = {}) {
+  const writeTracked = options.writeTracked !== false;
   const packagesDir = resolve(outputPath, "packages");
   const catalogDir = resolve(outputPath, "catalog");
   rmSync(outputPath, { recursive: true, force: true });
@@ -522,7 +602,9 @@ function buildCatalogFiles(entries, outputPath, repo, tag) {
     byChannel[channel].sort((left, right) => left.id.localeCompare(right.id));
     const fileBody = { agents: byChannel[channel] };
     writeJson(resolve(catalogDir, `${channel}.json`), fileBody);
-    writeJson(resolve(trackedCatalogDir, `${channel}.json`), fileBody);
+    if (writeTracked) {
+      writeJson(resolve(trackedCatalogDir, `${channel}.json`), fileBody);
+    }
   }
 
   writeFileSync(resolve(catalogDir, "checksums.txt"), `${checksums.join("\n")}\n`, "utf8");
@@ -571,7 +653,9 @@ function main() {
   assertInsideRepo(args.output);
   ensureZipAvailable();
 
-  const result = buildCatalogFiles(entries, args.output, repo, tag);
+  const result = buildCatalogFiles(entries, args.output, repo, tag, {
+    writeTracked: args.writeTracked,
+  });
   console.log(
     `Built ${result.packaged} package(s). Catalog counts -> stable: ${result.stable}, beta: ${result.beta}.`,
   );

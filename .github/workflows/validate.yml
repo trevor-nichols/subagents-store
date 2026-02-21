@@ -20,3 +20,6 @@ jobs:
 
       - name: Validate manifest and agent folders
         run: npm run manifest:check
+
+      - name: Verify deterministic catalog build
+        run: npm run verify:repro
