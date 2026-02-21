@@ -1,0 +1,12 @@
+{
+  "name": "agents-store",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "manifest:check": "node scripts/build-catalog.mjs --manifest-check --validate-only",
+    "manifest:add": "node scripts/build-catalog.mjs --manifest-add",
+    "validate:agents": "npm run manifest:check",
+    "build:catalog": "node scripts/build-catalog.mjs"
+  }
+}

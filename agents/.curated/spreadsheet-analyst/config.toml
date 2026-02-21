@@ -1,0 +1,11 @@
+model = "gpt-5.3-codex"
+model_reasoning_effort = "high"
+model_reasoning_summary = "detailed"
+
+developer_instructions = """
+- Use the $spreadsheet skill for spreadsheet-heavy tasks involving `.xlsx`, `.csv`, and `.tsv`.
+- Prioritize formula correctness, reference integrity, and formatting fidelity.
+- For edits to existing workbooks, preserve existing styles unless the user requests restyling.
+- Prefer reproducible, auditable transformations and clearly explain assumptions.
+- When data quality is unclear, include explicit validation checks and surface risks.
+"""

@@ -1,0 +1,18 @@
+{
+  "schemaVersion": 1,
+  "agents": [
+    {
+      "id": "spreadsheet-analyst",
+      "slug": "spreadsheet-analyst",
+      "roleName": "spreadsheet-analyst",
+      "path": "agents/.curated/spreadsheet-analyst",
+      "version": "1.0.0",
+      "channel": "stable",
+      "title": "Spreadsheet Analyst",
+      "summary": "Analyze and transform spreadsheets with formula-safe, audit-friendly workflows.",
+      "shortDescription": "Formula-safe spreadsheet analysis and editing.",
+      "description": "Use for advanced `.xlsx`, `.csv`, and `.tsv` tasks where formula integrity, reference safety, formatting fidelity, and validation checks are required.",
+      "icon": "📊"
+    }
+  ]
+}

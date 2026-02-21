@@ -1,0 +1,17 @@
+{
+  "agents": [
+    {
+      "id": "spreadsheet-analyst",
+      "slug": "spreadsheet-analyst",
+      "roleName": "spreadsheet-analyst",
+      "title": "Spreadsheet Analyst",
+      "summary": "Analyze and transform spreadsheets with formula-safe, audit-friendly workflows.",
+      "shortDescription": "Formula-safe spreadsheet analysis and editing.",
+      "description": "Use for advanced `.xlsx`, `.csv`, and `.tsv` tasks where formula integrity, reference safety, formatting fidelity, and validation checks are required.",
+      "icon": "📊",
+      "version": "1.0.0",
+      "packageUrl": "https://github.com/trevor-nichols/agents-store/releases/download/v0.1.0/spreadsheet-analyst-1.0.0.zip",
+      "sha256": "61c418920cac745979ae8250620ad87fcccd0f3a0fe93f3379cb8373c78bc622"
+    }
+  ]
+}
