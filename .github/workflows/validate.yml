@@ -1,4 +1,4 @@
-name: Validate Agents Store
+name: Validate Subagents Store
 
 on:
   pull_request:

@@ -1,5 +1,5 @@
 {
-  "name": "agents-store",
+  "name": "subagents-store",
   "version": "0.1.0",
   "private": true,
   "type": "module",
@@ -7,7 +7,7 @@
     "manifest:check": "node scripts/build-catalog.mjs --manifest-check --validate-only",
     "manifest:add": "node scripts/build-catalog.mjs --manifest-add",
     "verify:repro": "node scripts/verify-reproducible-build.mjs",
-    "validate:agents": "npm run manifest:check",
+    "validate:subagents": "npm run manifest:check",
     "build:catalog": "node scripts/build-catalog.mjs"
   }
 }

@@ -10,8 +10,8 @@
       "description": "Use for advanced `.xlsx`, `.csv`, and `.tsv` tasks where formula integrity, reference safety, formatting fidelity, and validation checks are required.",
       "icon": "📊",
       "version": "1.0.0",
-      "packageUrl": "https://github.com/trevor-nichols/agents-store/releases/download/v0.1.0/spreadsheet-analyst-1.0.0.zip",
-      "sha256": "e2089498374707a9992ec12a55c04341c95082f8f3e33642f1147b16615bc141"
+      "packageUrl": "https://github.com/trevor-nichols/subagents-store/releases/download/v0.1.1/spreadsheet-analyst-1.0.0.zip",
+      "sha256": "96885b7e241d081aa83505625f5b2cc20c9a892cc930e9ac9f297561b322587e"
     }
   ]
 }

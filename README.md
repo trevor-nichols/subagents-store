@@ -1,15 +1,15 @@
-# Agents Store
+# Subagents Store
 
 Public distribution repo for AgentWorkplace sub-agents.
 
-This repo is designed for the current AgentWorkplace agents storefront flow:
+This repo is designed for the current AgentWorkplace subagents storefront flow:
 - Frontend loads one or more remote `catalog.json` URLs.
-- Backend fetches entries, validates package hashes, and installs agents into `CODEX_HOME/agents/<slug>/config.toml`.
+- Backend fetches entries, validates package hashes, and installs subagents into `CODEX_HOME/agents/<slug>/config.toml`.
 
 ## Repository layout
 
 ```text
-agents-store/
+subagents-store/
   catalog/
     agents.manifest.json   # Source-of-truth metadata for packaging
     stable.json            # Generated remote catalog for stable channel
@@ -22,13 +22,13 @@ agents-store/
     build-catalog.mjs      # Validate, package, hash, and generate catalogs
 ```
 
-## Add an agent
+## Add a subagent
 
-1. Add your agent folder under one of:
+1. Add your subagent folder under one of:
    - `agents/.curated/<slug>/`
    - `agents/.system/<slug>/`
    - `agents/.experimental/<slug>/`
-2. Ensure each agent directory contains `config.toml`.
+2. Ensure each subagent directory contains `config.toml`.
 3. Optionally add `README.md`.
 4. Add a manifest scaffold entry:
 
@@ -107,7 +107,7 @@ node scripts/build-catalog.mjs --repo <owner/repo> --tag <tag> --no-write-tracke
 Example:
 
 ```bash
-node scripts/build-catalog.mjs --repo your-org/agents-store --tag v1.0.0
+node scripts/build-catalog.mjs --repo your-org/subagents-store --tag v0.1.1
 ```
 
 Outputs:
@@ -129,7 +129,7 @@ The release workflow (`.github/workflows/release.yml`) runs on tags (`v*`), rebu
 Point AgentWorkplace at your hosted catalogs, for example:
 
 ```bash
-VITE_AGENTS_CATALOG_URLS=https://raw.githubusercontent.com/<owner>/<repo>/main/catalog/stable.json,https://raw.githubusercontent.com/<owner>/<repo>/main/catalog/beta.json
+VITE_SUBAGENTS_CATALOG_URLS=https://raw.githubusercontent.com/<owner>/<repo>/main/catalog/stable.json,https://raw.githubusercontent.com/<owner>/<repo>/main/catalog/beta.json
 ```
 
 Or use release assets if you prefer immutable catalog URLs per release.

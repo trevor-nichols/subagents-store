@@ -1,4 +1,4 @@
-name: Release Agents Catalog
+name: Release Subagents Catalog
 
 on:
   push:

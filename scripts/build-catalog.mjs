@@ -108,7 +108,7 @@ Usage
 
 Options
   --validate-only        Validate manifest and agent folders without packaging.
-  --manifest <path>      Path to agents manifest (default: catalog/agents.manifest.json).
+  --manifest <path>      Path to catalog manifest (default: catalog/agents.manifest.json).
   --output <path>        Output directory for packages/catalog artifacts (default: dist).
   --repo <owner/name>    GitHub repository slug for package URLs (required unless --validate-only).
   --tag <tag>            Release tag used in package URLs (required unless --validate-only).
@@ -523,7 +523,7 @@ function packageAgent(agentPath, outputZipPath) {
     fail(`Agent package at ${agentPath} has no files.`);
   }
 
-  const stageRoot = mkdtempSync(resolve(tmpdir(), "agents-store-stage-"));
+  const stageRoot = mkdtempSync(resolve(tmpdir(), "subagents-store-stage-"));
   const stageAgentPath = resolve(stageRoot, "agent");
   mkdirSync(stageAgentPath, { recursive: true });
 

@@ -21,7 +21,7 @@ function runBuild(outputPath) {
   const args = [
     buildScript,
     "--repo",
-    "trevor-nichols/agents-store",
+    "trevor-nichols/subagents-store",
     "--tag",
     "v0.0.0-repro",
     "--output",

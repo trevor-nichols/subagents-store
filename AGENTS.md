@@ -1,8 +1,8 @@
-You are working in the `agents-store` repo which is used as an AgentWorkplace sub-agent storefront.
+You are working in the `subagents-store` repo which is used as an AgentWorkplace subagents storefront.
 
 Repository layout:
 
-agents-store/
+subagents-store/
   catalog/
     agents.manifest.json   # Source-of-truth metadata for packaging
     stable.json            # Generated remote catalog for stable channel
@@ -15,8 +15,8 @@ agents-store/
     build-catalog.mjs      # Validate, package, hash, and generate catalogs
 
 Rules:
-1. Agent folders live under `agents/.curated/<slug>`, `agents/.system/<slug>`, or `agents/.experimental/<slug>`.
-2. Each agent folder must include `config.toml`.
+1. Subagent folders live under `agents/.curated/<slug>`, `agents/.system/<slug>`, or `agents/.experimental/<slug>`.
+2. Each subagent folder must include `config.toml`.
 3. `README.md` is optional but recommended.
 4. Keep `id` and `slug` stable once published.
 5. Use `npm run manifest:add -- <agent-folder>` to scaffold manifest entries.
